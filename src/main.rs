@@ -1,5 +1,4 @@
 use portaudio::{PortAudio, Error};
-use std::f32::consts::PI;
 use rust_play_sound::{ Note, NoteName, Wave, Time };
 
 const SAMPLE_RATE: f32 = 48000.0;
@@ -17,16 +16,16 @@ fn main2() -> Result<(), Error> {
     settings.flags = portaudio::stream_flags::CLIP_OFF;
 
     let mut sample_number:i32 = 0;
-    let callback = move |portaudio::OutputStreamCallbackArgs { buffer, frames, .. }| {
+    let callback = move |args: portaudio::OutputStreamCallbackArgs<f32>| {
         let mut i = 0;
-        for _ in 0..frames {
+        for _ in 0..args.frames {
             let time = Time::samples_to_time(SAMPLE_RATE,sample_number);
             let value =
                 (Wave::square_wave(Note::new(4, NoteName::C).pitch(), time) +
                  Wave::square_wave(Note::new(4, NoteName::E).pitch(), time) +
                  Wave::square_wave(Note::new(4, NoteName::G).pitch(), time)).volume(0.3);
-            buffer[i] = value.to_value();
-            buffer[i + 1] = value.to_value();
+            args.buffer[i] = value.to_value();
+            args.buffer[i + 1] = value.to_value();
 
             i += 2;
             sample_number += 1;
